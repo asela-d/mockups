@@ -1,0 +1,571 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ibc-orange:#FB8C00;
+    --ibc-blue:#16284E;
+    --ibc-blue-light:#1a3260;
+    --red:#E24B4A;--amber:#EF9F27;--green:#639922;
+    --bg:#f5f4f0;--card:#fff;--border:#e8e6e0;
+    --text:#16284E;--muted:#6b7280;--light:#9ca3af;
+  }
+  body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+  .shell{display:flex;height:600px;overflow:hidden;border-radius:10px;border:1px solid var(--border)}
+  /* Sidebar */
+  .sidebar{width:180px;background:var(--ibc-blue);flex-shrink:0;display:flex;flex-direction:column;padding:0}
+  .logo-area{padding:16px 14px 12px;border-bottom:1px solid rgba(255,255,255,0.1)}
+  .logo-i{display:inline-flex;align-items:center;gap:4px;font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+  .logo-i span{color:var(--ibc-orange)}
+  .logo-sub{font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+  .nav{flex:1;padding:10px 0;overflow-y:auto}
+  .nav-section{padding:4px 14px 2px;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:8px}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;transition:all .15s;border-left:2px solid transparent}
+  .nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav-item.active{background:rgba(251,140,0,0.15);color:#fff;border-left-color:var(--ibc-orange)}
+  .nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.6;flex-shrink:0}
+  .nav-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+  /* Top bar */
+  .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .topbar-title{font-size:14px;font-weight:600;color:var(--text);flex:1}
+  .filter-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;color:var(--muted);cursor:pointer;background:var(--card);white-space:nowrap}
+  .filter-pill:hover{border-color:var(--ibc-orange);color:var(--ibc-orange)}
+  .filter-pill.active{border-color:var(--ibc-orange);color:var(--ibc-orange);background:rgba(251,140,0,0.06)}
+  .filter-pill span{font-size:10px;opacity:0.6}
+  /* Content */
+  .content{flex:1;overflow-y:auto;padding:16px 18px}
+  /* KPI Cards */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .kpi-card{background:var(--card);border-radius:8px;border:1px solid var(--border);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+  .kpi-card:hover{border-color:var(--ibc-orange);transform:translateY(-1px)}
+  .kpi-card .label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .kpi-card .value{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+  .kpi-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .kpi-card .bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--border)}
+  .kpi-card .bar-fill{height:100%;border-radius:0 2px 2px 0;transition:width .5s}
+  .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+  .badge.green{background:#eaf3de;color:#3B6D11}
+  .badge.amber{background:#faeeda;color:#854F0B}
+  .badge.red{background:#fcebeb;color:#A32D2D}
+  .badge.blue{background:#e6f1fb;color:#185FA5}
+  /* Red flags */
+  .section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .flag-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .flag-item{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:8px 12px;display:flex;align-items:center;gap:10px;cursor:pointer}
+  .flag-item:hover{background:#fef8f8}
+  .flag-item .flag-service{font-weight:600;font-size:12px;min-width:120px}
+  .flag-item .flag-reason{font-size:11px;color:var(--muted);flex:1}
+  .flag-item .flag-badge{flex-shrink:0}
+  .flag-item.amber-flag{border-left-color:var(--amber)}
+  .flag-item.amber-flag:hover{background:#fefaf0}
+  /* Chart area */
+  .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:14px}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+  .chart-card .ch{font-size:11px;font-weight:600;color:var(--text);margin-bottom:10px}
+  /* Mini chart bars */
+  .sparkbar{display:flex;align-items:flex-end;gap:3px;height:60px}
+  .sparkbar-col{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height .3s}
+  /* Service table */
+  .svc-table{width:100%;border-collapse:collapse;font-size:11px}
+  .svc-table th{text-align:left;padding:5px 8px;font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+  .svc-table td{padding:6px 8px;border-bottom:1px solid var(--border)}
+  .svc-table tr:last-child td{border-bottom:none}
+  .svc-table tr:hover td{background:#f9f8f5}
+  /* Trend dots */
+  .trend{display:flex;align-items:center;gap:2px}
+  .trend-dot{width:5px;height:5px;border-radius:50%}
+  /* Page hidden */
+  .page{display:none}.page.active{display:block}
+  /* Detail page */
+  .detail-kpi-header{background:var(--ibc-blue);border-radius:8px;padding:16px;color:#fff;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+  .detail-kpi-header .big{font-size:32px;font-weight:700}
+  .detail-kpi-header .sub2{font-size:12px;opacity:.6;margin-top:2px}
+  .detail-kpi-header .accent{color:var(--ibc-orange)}
+  .full-chart{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+  .line-chart{height:100px;display:flex;align-items:flex-end;gap:4px;padding-top:10px}
+  .line-chart-wrap{position:relative;height:100px}
+  .svc-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .svc-mini{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+  .svc-mini .sn{font-size:11px;font-weight:600;margin-bottom:2px}
+  .svc-mini .sv{font-size:18px;font-weight:700}
+  /* Orange accent line */
+  .accent-bar{height:2px;background:var(--ibc-orange);border-radius:1px;margin-bottom:14px}
+</style>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo-area">
+      <div class="logo-i">i<span>|</span>BC</div>
+      <div class="logo-sub">KPI Dashboard</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('overview',this)">
+        <span class="nav-icon">⬛</span> Overview
+      </div>
+      <div class="nav-section">KPIs</div>
+      <div class="nav-item" onclick="showPage('occupancy',this)">
+        <div class="nav-dot"></div> Occupancy
+      </div>
+      <div class="nav-item" onclick="showPage('agency',this)">
+        <div class="nav-dot"></div> Agency Hours
+      </div>
+      <div class="nav-item" onclick="showPage('leavers',this)">
+        <div class="nav-dot"></div> Staff Leavers
+      </div>
+      <div class="nav-item" onclick="showPage('quality',this)">
+        <div class="nav-dot"></div> Internal Quality
+      </div>
+      <div class="nav-item" onclick="showPage('cqc',this)">
+        <div class="nav-dot"></div> CQC Rating
+      </div>
+      <div class="nav-item" onclick="showPage('ebitda',this)">
+        <div class="nav-dot"></div> EBITDA %
+      </div>
+      <div class="nav-item" onclick="showPage('turnover',this)">
+        <div class="nav-dot"></div> Colleague Turnover
+      </div>
+      <div class="nav-section">Reports</div>
+      <div class="nav-item" onclick="showPage('redflags',this)">
+        <div class="nav-dot" style="background:var(--ibc-orange)"></div> Red Flags
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Executive Overview</div>
+      <div class="filter-pill active"><span>Territory</span> All</div>
+      <div class="filter-pill"><span>Category</span> All Services</div>
+      <div class="filter-pill"><span>Year</span> FY 2024/25</div>
+      <div class="filter-pill"><span>Period</span> YTD</div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW PAGE -->
+      <div class="page active" id="pg-overview">
+        <div class="accent-bar"></div>
+        <div class="kpi-grid">
+          <div class="kpi-card" onclick="showPage('occupancy',null)">
+            <div class="label">Occupancy</div>
+            <div class="value">87<span style="font-size:14px">%</span></div>
+            <div class="sub">Occ. units: 94 / 108 cap.</div>
+            <div style="margin-top:8px"><span class="badge amber">▼ 2pts vs last month</span></div>
+            <div class="bar"><div class="bar-fill" style="width:87%;background:var(--amber)"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('agency',null)">
+            <div class="label">Agency Hours %</div>
+            <div class="value">14<span style="font-size:14px">%</span></div>
+            <div class="sub">of commissioned hours</div>
+            <div style="margin-top:8px"><span class="badge red">▲ Spike this week</span></div>
+            <div class="bar"><div class="bar-fill" style="width:14%;background:var(--red)"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('leavers',null)">
+            <div class="label">Staff Leavers</div>
+            <div class="value">6</div>
+            <div class="sub">This month</div>
+            <div style="margin-top:8px"><span class="badge red">▲ Above threshold</span></div>
+            <div class="bar"><div class="bar-fill" style="width:55%;background:var(--red)"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('quality',null)">
+            <div class="label">Internal Quality</div>
+            <div class="value" style="font-size:16px;margin-top:4px">Good</div>
+            <div class="sub">Avg across services</div>
+            <div style="margin-top:8px"><span class="badge green">Stable</span></div>
+            <div class="bar"><div class="bar-fill" style="width:70%;background:var(--green)"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('cqc',null)">
+            <div class="label">CQC Rating</div>
+            <div class="value" style="font-size:16px;margin-top:4px">Good</div>
+            <div class="sub">Last external review</div>
+            <div style="margin-top:8px"><span class="badge blue">Next: Q2 2025</span></div>
+            <div class="bar"><div class="bar-fill" style="width:70%;background:#185FA5"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('ebitda',null)">
+            <div class="label">EBITDA %</div>
+            <div class="value">11<span style="font-size:14px">%</span></div>
+            <div class="sub">YTD margin</div>
+            <div style="margin-top:8px"><span class="badge green">▲ +1pt vs target</span></div>
+            <div class="bar"><div class="bar-fill" style="width:11%;background:var(--green)"></div></div>
+          </div>
+          <div class="kpi-card" onclick="showPage('turnover',null)">
+            <div class="label">Colleague Turnover</div>
+            <div class="value">22<span style="font-size:14px">%</span></div>
+            <div class="sub">Rolling 12 months</div>
+            <div style="margin-top:8px"><span class="badge amber">▲ Watch</span></div>
+            <div class="bar"><div class="bar-fill" style="width:22%;background:var(--amber)"></div></div>
+          </div>
+          <div class="kpi-card" style="background:rgba(251,140,0,0.05);border-color:rgba(251,140,0,0.3);cursor:default">
+            <div class="label">Active Red Flags</div>
+            <div class="value" style="color:var(--red)">4</div>
+            <div class="sub">Requiring attention</div>
+            <div style="margin-top:8px"><span class="badge red">2 critical</span></div>
+            <div class="bar"><div class="bar-fill" style="width:100%;background:var(--red)"></div></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="chart-card">
+            <div class="ch">Occupancy trend — all services (last 8 weeks)</div>
+            <div class="sparkbar">
+              <div class="sparkbar-col" style="height:72%;background:#c0dd97"></div>
+              <div class="sparkbar-col" style="height:76%;background:#97c459"></div>
+              <div class="sparkbar-col" style="height:78%;background:#97c459"></div>
+              <div class="sparkbar-col" style="height:82%;background:#639922"></div>
+              <div class="sparkbar-col" style="height:90%;background:#639922"></div>
+              <div class="sparkbar-col" style="height:88%;background:#639922"></div>
+              <div class="sparkbar-col" style="height:85%;background:#97c459"></div>
+              <div class="sparkbar-col" style="height:87%;background:#97c459"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:10px;color:var(--light)">W1</span>
+              <span style="font-size:10px;color:var(--light)">W8 (latest)</span>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch">Service category snapshot</div>
+            <table style="width:100%;font-size:11px;border-collapse:collapse">
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:5px 0;font-weight:600">Residential</td>
+                <td style="padding:5px 0;text-align:right"><span class="badge green">89%</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:5px 0;font-weight:600">Supported Living</td>
+                <td style="padding:5px 0;text-align:right"><span class="badge amber">84%</span></td>
+              </tr>
+              <tr>
+                <td style="padding:5px 0;font-weight:600">Day Services</td>
+                <td style="padding:5px 0;text-align:right"><span class="badge green">92%</span></td>
+              </tr>
+            </table>
+            <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+              <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:4px">Territory</div>
+              <div style="display:flex;gap:6px">
+                <span class="badge green">North 88%</span>
+                <span class="badge amber">South 85%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span style="color:var(--red)">⬛</span> Active red flags
+        </div>
+        <div class="flag-list">
+          <div class="flag-item">
+            <div class="flag-service">SL West Midlands</div>
+            <div class="flag-reason">Low occupancy for 2 consecutive weeks + 2 staff leavers this month</div>
+            <div class="flag-badge"><span class="badge red">Critical</span></div>
+          </div>
+          <div class="flag-item">
+            <div class="flag-service">Fordrough Cottage</div>
+            <div class="flag-reason">Agency hours spike: 31% vs 4-week avg of 18%</div>
+            <div class="flag-badge"><span class="badge red">Critical</span></div>
+          </div>
+          <div class="flag-item amber-flag">
+            <div class="flag-service">SL North</div>
+            <div class="flag-reason">Internal quality rating dropped from Outstanding to Good</div>
+            <div class="flag-badge"><span class="badge amber">Watch</span></div>
+          </div>
+          <div class="flag-item amber-flag">
+            <div class="flag-service">Tarry Hill</div>
+            <div class="flag-reason">Leavers spike: 3 this month vs avg of 1</div>
+            <div class="flag-badge"><span class="badge amber">Watch</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OCCUPANCY PAGE -->
+      <div class="page" id="pg-occupancy">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Weekly</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">Occupancy <span class="accent">%</span></div>
+            <div class="sub2">Logic: Occupied Units ÷ Capacity Units · Excel source</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big">87<span style="font-size:18px">%</span></div>
+            <div class="sub2">Current week · <span class="accent">Target ≥90%</span></div>
+          </div>
+        </div>
+        <div class="full-chart">
+          <div class="ch" style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">8-week occupancy trend by category</div>
+          <div style="display:flex;gap:6px;align-items:flex-end;height:80px">
+            <div style="flex:1;background:#eaf3de;border-radius:3px 3px 0 0" title="Residential"></div>
+            <div style="flex:1;background:#c0dd97;border-radius:3px 3px 0 0" style="height:88%"></div>
+            <div style="flex:1;background:#97c459;border-radius:3px 3px 0 0" style="height:72%"></div>
+            <div style="flex:1;background:#639922;border-radius:3px 3px 0 0" style="height:90%"></div>
+            <div style="flex:1;background:#639922;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;background:#97c459;border-radius:3px 3px 0 0" style="height:88%"></div>
+            <div style="flex:1;background:#c0dd97;border-radius:3px 3px 0 0" style="height:82%"></div>
+            <div style="flex:1;background:#97c459;border-radius:3px 3px 0 0" style="height:87%"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <span style="font-size:10px;color:var(--muted)">● Residential &nbsp; ● Supported Living &nbsp; ● Day Services</span>
+          </div>
+        </div>
+        <div class="svc-breakdown">
+          <div class="svc-mini"><div class="sn">Tarry Hill</div><div class="sv">91%</div><span class="badge green">On track</span></div>
+          <div class="svc-mini"><div class="sn">Dovecote</div><div class="sv">88%</div><span class="badge green">On track</span></div>
+          <div class="svc-mini"><div class="sn">Fordrough Cottage</div><div class="sv">76%</div><span class="badge red">Below target</span></div>
+          <div class="svc-mini"><div class="sn">SL West Midlands</div><div class="sv">71%</div><span class="badge red">Red flag</span></div>
+          <div class="svc-mini"><div class="sn">SL North</div><div class="sv">86%</div><span class="badge amber">Watch</span></div>
+          <div class="svc-mini"><div class="sn">Spoilt4Choice</div><div class="sv">94%</div><span class="badge green">On track</span></div>
+        </div>
+      </div>
+
+      <!-- AGENCY PAGE -->
+      <div class="page" id="pg-agency">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Weekly</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">Agency Hours <span class="accent">%</span></div>
+            <div class="sub2">Logic: Agency Hours ÷ Commissioned Hours · Excel source</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big" style="color:#EF9F27">14<span style="font-size:18px">%</span></div>
+            <div class="sub2">Current week · <span class="accent">Target ≤10%</span></div>
+          </div>
+        </div>
+        <div class="full-chart">
+          <div class="ch" style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">Agency % vs 4-week rolling average</div>
+          <div style="display:flex;gap:6px;align-items:flex-end;height:80px">
+            <div style="flex:1;height:50%;background:#fac775;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:55%;background:#fac775;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:45%;background:#ef9f27;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:60%;background:#ef9f27;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:48%;background:#fac775;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:52%;background:#ef9f27;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:58%;background:#ef9f27;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:75%;background:#E24B4A;border-radius:3px 3px 0 0"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <span style="font-size:10px;color:var(--light)">W1</span>
+            <span style="font-size:10px;color:var(--red);font-weight:600">W8 — SPIKE ▲</span>
+          </div>
+        </div>
+        <div class="svc-breakdown">
+          <div class="svc-mini"><div class="sn">Fordrough Cottage</div><div class="sv" style="color:var(--red)">31%</div><span class="badge red">Red flag</span></div>
+          <div class="svc-mini"><div class="sn">SL Staffordshire</div><div class="sv" style="color:var(--amber)">18%</div><span class="badge amber">Watch</span></div>
+          <div class="svc-mini"><div class="sn">Orchard Court</div><div class="sv">9%</div><span class="badge green">On track</span></div>
+          <div class="svc-mini"><div class="sn">SL North</div><div class="sv">11%</div><span class="badge amber">Watch</span></div>
+          <div class="svc-mini"><div class="sn">Dovecote</div><div class="sv">7%</div><span class="badge green">On track</span></div>
+          <div class="svc-mini"><div class="sn">Forward Day</div><div class="sv">5%</div><span class="badge green">On track</span></div>
+        </div>
+      </div>
+
+      <!-- LEAVERS PAGE -->
+      <div class="page" id="pg-leavers">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Monthly</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">Staff Leavers</div>
+            <div class="sub2">Count per service · Manual update · Excel source</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big" style="color:var(--red)">6</div>
+            <div class="sub2">This month · <span class="accent">Threshold: ≤3</span></div>
+          </div>
+        </div>
+        <div class="full-chart">
+          <div class="ch" style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">Monthly leavers — rolling 6 months</div>
+          <div style="display:flex;gap:6px;align-items:flex-end;height:80px">
+            <div style="flex:1;height:25%;background:#c0dd97;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:40%;background:#97c459;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:30%;background:#c0dd97;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:35%;background:#97c459;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:28%;background:#c0dd97;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:70%;background:#E24B4A;border-radius:3px 3px 0 0"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <span style="font-size:10px;color:var(--light)">Aug</span>
+            <span style="font-size:10px;color:var(--red);font-weight:600">Jan — spike ▲</span>
+          </div>
+        </div>
+        <div class="svc-breakdown">
+          <div class="svc-mini"><div class="sn">Tarry Hill</div><div class="sv" style="color:var(--red)">3</div><span class="badge red">Above avg</span></div>
+          <div class="svc-mini"><div class="sn">SL West Midlands</div><div class="sv" style="color:var(--amber)">2</div><span class="badge amber">Watch</span></div>
+          <div class="svc-mini"><div class="sn">Orchard Court</div><div class="sv">1</div><span class="badge green">Normal</span></div>
+          <div class="svc-mini"><div class="sn">SL North</div><div class="sv">0</div><span class="badge green">Normal</span></div>
+          <div class="svc-mini"><div class="sn">Dovecote</div><div class="sv">0</div><span class="badge green">Normal</span></div>
+          <div class="svc-mini"><div class="sn">Forward Day</div><div class="sv">0</div><span class="badge green">Normal</span></div>
+        </div>
+      </div>
+
+      <!-- QUALITY PAGE -->
+      <div class="page" id="pg-quality">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Quarterly</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">Internal Quality Rating</div>
+            <div class="sub2">Per service · Rated: Outstanding / Good / Requires Improvement / Inadequate</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big" style="font-size:22px">Good</div>
+            <div class="sub2">Portfolio average</div>
+          </div>
+        </div>
+        <div class="svc-breakdown" style="grid-template-columns:repeat(4,1fr)">
+          <div class="svc-mini"><div class="sn">Tarry Hill</div><div class="sv" style="font-size:13px;margin:4px 0">Outstanding</div><span class="badge green">Q1 2025</span></div>
+          <div class="svc-mini"><div class="sn">Dovecote</div><div class="sv" style="font-size:13px;margin:4px 0">Good</div><span class="badge green">Q1 2025</span></div>
+          <div class="svc-mini"><div class="sn">SL North</div><div class="sv" style="font-size:13px;margin:4px 0;color:var(--amber)">Good ▼</div><span class="badge amber">Dropped</span></div>
+          <div class="svc-mini"><div class="sn">Fordrough Cottage</div><div class="sv" style="font-size:13px;margin:4px 0;color:var(--amber)">Req. Improv.</div><span class="badge red">Watch</span></div>
+          <div class="svc-mini"><div class="sn">Spoilt4Choice</div><div class="sv" style="font-size:13px;margin:4px 0">Good</div><span class="badge green">Q1 2025</span></div>
+          <div class="svc-mini"><div class="sn">Forward Day</div><div class="sv" style="font-size:13px;margin:4px 0">Outstanding</div><span class="badge green">Q1 2025</span></div>
+          <div class="svc-mini"><div class="sn">Orchard Court</div><div class="sv" style="font-size:13px;margin:4px 0">Good</div><span class="badge green">Q1 2025</span></div>
+          <div class="svc-mini"><div class="sn">SL West Midlands</div><div class="sv" style="font-size:13px;margin:4px 0;color:var(--red)">Req. Improv.</div><span class="badge red">Red flag</span></div>
+        </div>
+      </div>
+
+      <!-- CQC PAGE -->
+      <div class="page" id="pg-cqc">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Ad Hoc / External</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">CQC Rating</div>
+            <div class="sub2">External inspection · Rated by CQC · Infrequent</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big" style="font-size:22px;color:#185FA5">Good</div>
+            <div class="sub2">Last review: Oct 2024</div>
+          </div>
+        </div>
+        <div class="svc-breakdown" style="grid-template-columns:repeat(4,1fr)">
+          <div class="svc-mini"><div class="sn">Tarry Hill</div><div class="sv" style="font-size:13px;margin:4px 0;color:#185FA5">Good</div><span class="badge blue">Oct 2024</span></div>
+          <div class="svc-mini"><div class="sn">Dovecote</div><div class="sv" style="font-size:13px;margin:4px 0;color:var(--green)">Outstanding</div><span class="badge green">Aug 2024</span></div>
+          <div class="svc-mini"><div class="sn">Lester Hall</div><div class="sv" style="font-size:13px;margin:4px 0;color:#185FA5">Good</div><span class="badge blue">Jun 2024</span></div>
+          <div class="svc-mini"><div class="sn">Fordrough Cottage</div><div class="sv" style="font-size:13px;margin:4px 0;color:var(--amber)">Req. Improv.</div><span class="badge amber">Mar 2024</span></div>
+          <div class="svc-mini"><div class="sn">SL North</div><div class="sv" style="font-size:13px;margin:4px 0;color:#185FA5">Good</div><span class="badge blue">May 2024</span></div>
+          <div class="svc-mini"><div class="sn">Orchard Court</div><div class="sv" style="font-size:13px;margin:4px 0">Awaiting</div><span class="badge blue">Scheduled Q2</span></div>
+        </div>
+      </div>
+
+      <!-- EBITDA PAGE -->
+      <div class="page" id="pg-ebitda">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Monthly (New)</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">EBITDA <span class="accent">%</span></div>
+            <div class="sub2">EBITDA ÷ Revenue · Manual update · Excel source</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big">11<span style="font-size:18px">%</span></div>
+            <div class="sub2">YTD · <span class="accent">Target ≥10%</span></div>
+          </div>
+        </div>
+        <div class="full-chart">
+          <div class="ch" style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">Monthly EBITDA % — YTD vs target (dashed)</div>
+          <div style="display:flex;gap:6px;align-items:flex-end;height:80px">
+            <div style="flex:1;height:60%;background:#c0dd97;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:65%;background:#97c459;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:62%;background:#97c459;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:70%;background:#639922;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:75%;background:#639922;border-radius:3px 3px 0 0"></div>
+            <div style="flex:1;height:68%;background:#97c459;border-radius:3px 3px 0 0"></div>
+          </div>
+        </div>
+        <div style="background:rgba(251,140,0,0.08);border:1px solid rgba(251,140,0,0.3);border-radius:8px;padding:12px;font-size:12px;color:var(--text)">
+          <strong>Note:</strong> EBITDA % is a new addition to V1. Data source is Excel. Ensure the Finance team agrees on the logic (Revenue definition, cost inclusions) before go-live. This page will be replaced with a live system feed in a future phase.
+        </div>
+      </div>
+
+      <!-- TURNOVER PAGE -->
+      <div class="page" id="pg-turnover">
+        <div class="accent-bar"></div>
+        <div class="detail-kpi-header">
+          <div>
+            <div style="font-size:11px;opacity:.5;text-transform:uppercase;letter-spacing:1px">KPI — Monthly (New)</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">Colleague Turnover <span class="accent">%</span></div>
+            <div class="sub2">Leavers ÷ Avg headcount · Rolling 12 months · Excel source</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big" style="color:var(--amber)">22<span style="font-size:18px">%</span></div>
+            <div class="sub2">R12M · <span class="accent">Target ≤18%</span></div>
+          </div>
+        </div>
+        <div class="svc-breakdown">
+          <div class="svc-mini"><div class="sn">Residential</div><div class="sv" style="color:var(--amber)">24%</div><span class="badge amber">Above target</span></div>
+          <div class="svc-mini"><div class="sn">Supported Living</div><div class="sv" style="color:var(--red)">27%</div><span class="badge red">High</span></div>
+          <div class="svc-mini"><div class="sn">Day Services</div><div class="sv">14%</div><span class="badge green">On target</span></div>
+          <div class="svc-mini"><div class="sn">North</div><div class="sv">19%</div><span class="badge amber">Watch</span></div>
+          <div class="svc-mini"><div class="sn">South</div><div class="sv">25%</div><span class="badge red">High</span></div>
+        </div>
+      </div>
+
+      <!-- RED FLAGS PAGE -->
+      <div class="page" id="pg-redflags">
+        <div class="accent-bar"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--red);border-radius:6px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--red)">2</div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:2px">Critical</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--amber);border-radius:6px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--amber)">2</div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:2px">Watch</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:6px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--green)">10</div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:2px">Clear</div>
+          </div>
+        </div>
+        <div class="flag-list">
+          <div class="flag-item">
+            <div style="min-width:6px;width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
+            <div class="flag-service">SL West Midlands</div>
+            <div class="flag-reason">Low occupancy (71%) — week 2 of 2 · Combined: low quality + high leavers</div>
+            <div class="flag-badge"><span class="badge red">Multi-flag</span></div>
+          </div>
+          <div class="flag-item">
+            <div style="min-width:6px;width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
+            <div class="flag-service">Fordrough Cottage</div>
+            <div class="flag-reason">Agency hours 31% vs 4-week avg 18% — spike threshold exceeded</div>
+            <div class="flag-badge"><span class="badge red">Agency spike</span></div>
+          </div>
+          <div class="flag-item amber-flag">
+            <div style="min-width:6px;width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
+            <div class="flag-service">SL North</div>
+            <div class="flag-reason">Internal quality: Outstanding → Good (1-level drop)</div>
+            <div class="flag-badge"><span class="badge amber">Quality drop</span></div>
+          </div>
+          <div class="flag-item amber-flag">
+            <div style="min-width:6px;width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
+            <div class="flag-service">Tarry Hill</div>
+            <div class="flag-reason">3 leavers this month vs rolling avg of 1 — monthly spike</div>
+            <div class="flag-badge"><span class="badge amber">Leaver spike</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles = {
+    overview:'Executive Overview', occupancy:'Occupancy %',
+    agency:'Agency Hours %', leavers:'Staff Leavers',
+    quality:'Internal Quality Rating', cqc:'CQC Rating',
+    ebitda:'EBITDA %', turnover:'Colleague Turnover %',
+    redflags:'Red Flag Report'
+  };
+  document.getElementById('page-title').textContent = titles[id]||id;
+}
+</script>
